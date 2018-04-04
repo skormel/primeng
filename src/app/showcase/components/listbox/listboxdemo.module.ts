@@ -7,19 +7,21 @@ import {ListboxModule} from '../../../components/listbox/listbox';
 import {ButtonModule} from '../../../components/button/button';
 import {TabViewModule} from '../../../components/tabview/tabview';
 import {CodeHighlighterModule} from '../../../components/codehighlighter/codehighlighter';
+import {ContextMenuModule} from '../../../components/contextmenu/contextmenu';
 
 @NgModule({
-	imports: [
-		CommonModule,
-        FormsModule,
-		ListboxDemoRoutingModule,
-        ListboxModule,
-        ButtonModule,
-        TabViewModule,
-        CodeHighlighterModule
-	],
-	declarations: [
-		ListboxDemo
-	]
+  imports: [
+    CommonModule,
+    FormsModule,
+    ListboxDemoRoutingModule,
+    ListboxModule,
+    ButtonModule,
+    TabViewModule,
+    CodeHighlighterModule,
+    ContextMenuModule
+  ],
+  declarations: [
+    ListboxDemo
+  ]
 })
 export class ListboxDemoModule {}

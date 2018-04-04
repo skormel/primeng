@@ -40,7 +40,7 @@ export const LISTBOX_VALUE_ACCESSOR: any = {
         <ul class="ui-listbox-list">
           <li *ngFor="let option of options; let i = index;" [style.display]="isItemVisible(option) ? 'block' : 'none'"
               [ngClass]="{'ui-listbox-item ui-corner-all':true,'ui-state-highlight':isSelected(option)}"
-              (click)="onOptionClick($event,option)" (dblclick)="onDoubleClick($event,option)" (touchend)="onOptionTouchEnd($event,option)">
+              (click)="onOptionClick($event,option)" (dblclick)="onDoubleClick($event,option)" (touchend)="onOptionTouchEnd($event,option)" (contextmenu)="onRightClick($event,option)">
             <div class="ui-chkbox ui-widget" *ngIf="checkbox && multiple" (click)="onCheckboxClick($event,option)">
               <div class="ui-helper-hidden-accessible">
                 <input type="checkbox" [checked]="isSelected(option)" [disabled]="disabled">
@@ -62,110 +62,114 @@ export const LISTBOX_VALUE_ACCESSOR: any = {
   providers: [DomHandler,ObjectUtils,LISTBOX_VALUE_ACCESSOR]
 })
 export class Listbox implements AfterContentInit,ControlValueAccessor {
-    
+
   @Input() multiple: boolean;
-  
+
   @Input() style: any;
-  
+
   @Input() styleClass: string;
-  
+
   @Input() listStyle: any;
-  
+
   @Input() readonly: boolean;
-  
+
   @Input() disabled: boolean;
-  
+
   @Input() checkbox: boolean = false;
-  
+
   @Input() filter: boolean = false;
-  
+
   @Input() filterMode: string = 'contains';
-  
+
   @Input() metaKeySelection: boolean = true;
-  
+
   @Input() dataKey: string;
-  
+
   @Input() showToggleAll: boolean = true;
-  
+
   @Input() optionLabel: string;
-  
+
+  @Input() contextMenu: any;
+
+  @Output() onContextMenuSelect: EventEmitter<any> = new EventEmitter();
+
   @Output() onChange: EventEmitter<any> = new EventEmitter();
-  
+
   @Output() onDblClick: EventEmitter<any> = new EventEmitter();
-  
+
   @ContentChild(Header) headerFacet;
-  
+
   @ContentChild(Footer) footerFacet;
-  
+
   @ContentChildren(PrimeTemplate) templates: QueryList<any>;
-  
+
   public itemTemplate: TemplateRef<any>;
-  
+
   public filterValue: string;
-  
+
   public filtered: boolean;
-  
+
   public value: any;
-  
+
   public onModelChange: Function = () => { };
-  
+
   public onModelTouched: Function = () => { };
-  
+
   public checkboxClick: boolean;
-  
+
   public optionTouched: boolean;
-  
+
   public focus: boolean;
-  
+
   public _options: any[];
-  
+
   constructor(public el: ElementRef, public domHandler: DomHandler, public objectUtils: ObjectUtils, public cd: ChangeDetectorRef) {}
-  
+
   @Input() get options(): any[] {
-      return this._options;
+    return this._options;
   }
 
   set options(val: any[]) {
-      let opts = this.optionLabel ? this.objectUtils.generateSelectItems(val, this.optionLabel) : val;
-      this._options = opts;
+    let opts = this.optionLabel ? this.objectUtils.generateSelectItems(val, this.optionLabel) : val;
+    this._options = opts;
   }
-  
+
   ngAfterContentInit() {
     this.templates.forEach((item) => {
       switch(item.getType()) {
         case 'item':
           this.itemTemplate = item.template;
           break;
-        
+
         default:
           this.itemTemplate = item.template;
           break;
       }
     });
   }
-  
+
   writeValue(value: any): void {
     this.value = value;
     this.cd.markForCheck();
   }
-  
+
   registerOnChange(fn: Function): void {
     this.onModelChange = fn;
   }
-  
+
   registerOnTouched(fn: Function): void {
     this.onModelTouched = fn;
   }
-  
+
   setDisabledState(val: boolean): void {
     this.disabled = val;
   }
-  
+
   onOptionClick(event, option) {
     if(this.disabled) {
       return;
     }
-    
+
     if(!this.checkboxClick) {
       if(this.multiple)
         this.onOptionClickMultiple(event, option);
@@ -175,26 +179,26 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
     else {
       this.checkboxClick = false;
     }
-    
+
     this.optionTouched = false;
   }
-  
+
   onOptionTouchEnd(event, option) {
     if(this.disabled) {
       return;
     }
-    
+
     this.optionTouched = true;
   }
-  
+
   onOptionClickSingle(event, option) {
     let selected = this.isSelected(option);
     let valueChanged = false;
     let metaSelection = this.optionTouched ? false : this.metaKeySelection;
-    
+
     if(metaSelection) {
       let metaKey = (event.metaKey || event.ctrlKey);
-      
+
       if(selected) {
         if(metaKey) {
           this.value = null;
@@ -210,7 +214,7 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
       this.value = selected ? null : option.value;
       valueChanged = true;
     }
-    
+
     if(valueChanged) {
       this.onModelChange(this.value);
       this.onChange.emit({
@@ -219,15 +223,15 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
       });
     }
   }
-  
+
   onOptionClickMultiple(event, option) {
     let selected = this.isSelected(option);
     let valueChanged = false;
     let metaSelection = this.optionTouched ? false : this.metaKeySelection;
-    
+
     if(metaSelection) {
       let metaKey = (event.metaKey || event.ctrlKey);
-      
+
       if(selected) {
         if(metaKey) {
           this.removeOption(option);
@@ -250,10 +254,10 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
       else {
         this.value = [...this.value||[],option.value];
       }
-      
+
       valueChanged = true;
     }
-    
+
     if (valueChanged) {
       this.onModelChange(this.value);
       this.onChange.emit({
@@ -262,14 +266,14 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
       });
     }
   }
-  
+
   removeOption(option: any): void {
     this.value = this.value.filter(val => !this.objectUtils.equals(val, option.value, this.dataKey));
   }
-  
+
   isSelected(option: SelectItem) {
     let selected = false;
-    
+
     if(this.multiple) {
       if(this.value) {
         for(let val of this.value) {
@@ -283,17 +287,17 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
     else {
       selected = this.objectUtils.equals(this.value, option.value, this.dataKey);
     }
-    
+
     return selected;
   }
-  
+
   get allChecked(): boolean {
     if(this.filterValue)
       return this.allFilteredSelected();
     else
       return this.value && this.options && (this.value.length === this.options.length);
   }
-  
+
   allFilteredSelected(): boolean {
     let allSelected: boolean;
     if(this.value && this.options && this.options.length) {
@@ -307,20 +311,20 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
         }
       }
     }
-    
+
     return allSelected;
   }
-  
+
   onFilter(event) {
     let query = event.target.value.trim().toLowerCase();
     this.filterValue = query.length ? query : null;
   }
-  
+
   toggleAll(event, checkbox) {
     if(this.disabled || !this.options || this.options.length === 0) {
       return;
     }
-    
+
     if(checkbox.checked) {
       this.value = [];
     }
@@ -339,50 +343,57 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
     this.onModelChange(this.value);
     this.onChange.emit({originalEvent: event, value: this.value});
   }
-  
+
   isItemVisible(option: SelectItem): boolean {
     if(this.filterValue) {
       let visible;
-      
+
       switch(this.filterMode) {
         case 'startsWith':
           visible = option.label.toLowerCase().indexOf(this.filterValue.toLowerCase()) === 0;
           break;
-        
+
         case 'contains':
           visible = option.label.toLowerCase().indexOf(this.filterValue.toLowerCase()) > -1;
           break;
-        
+
         default:
           visible = true;
       }
-      
+
       return visible;
     }
     else {
       return true;
     }
   }
-  
+
+  onRightClick(event, option) {
+    console.log('contextmenu-event:', event);
+    console.log('contextmenu-option:', option);
+    this.contextMenu.show(event);
+    this.onContextMenuSelect.emit({originalEvent: event, data: option});
+  }
+
   onDoubleClick(event: Event, option: SelectItem): any {
     if(this.disabled) {
       return;
     }
-    
+
     this.onDblClick.emit({
       originalEvent: event,
       value: this.value
     })
   }
-  
+
   onCheckboxClick(event: Event, option: SelectItem) {
     if(this.disabled) {
       return;
     }
-    
+
     this.checkboxClick = true;
     let selected = this.isSelected(option);
-    
+
     if(selected) {
       this.removeOption(option);
     }
@@ -390,18 +401,18 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
       this.value = this.value ? this.value : [];
       this.value = [...this.value,option.value];
     }
-    
+
     this.onModelChange(this.value);
     this.onChange.emit({
       originalEvent: event,
       value: this.value
     });
   }
-  
+
   onInputFocus(event) {
     this.focus = true;
   }
-  
+
   onInputBlur(event) {
     this.focus = false;
   }
@@ -413,4 +424,3 @@ export class Listbox implements AfterContentInit,ControlValueAccessor {
   declarations: [Listbox]
 })
 export class ListboxModule { }
-

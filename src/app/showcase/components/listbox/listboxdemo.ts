@@ -1,47 +1,59 @@
 import {Component} from '@angular/core';
 import {SelectItem} from '../../../components/common/api';
+import {Message,MenuItem} from '../../../components/common/api';
+
 
 interface City {
-    name: string,
-    code: string
+  name: string,
+  code: string
 }
 
 @Component({
-    templateUrl: './listboxdemo.html'
+  templateUrl: './listboxdemo.html'
 })
 export class ListboxDemo {
 
-    cities: City[];
+  msgs: Message[];
 
-    selectedCity: City;
+  items: MenuItem[];
 
-    selectedCities: City[];
+  cities: City[];
 
-    cars: SelectItem[];
+  selectedCity: City;
 
-    selectedCar: string = 'BMW';
+  selectedCities: City[];
 
-    constructor() {
-        this.cities = [
-            {name: 'New York', code: 'NY'},
-            {name: 'Rome', code: 'RM'},
-            {name: 'London', code: 'LDN'},
-            {name: 'Istanbul', code: 'IST'},
-            {name: 'Paris', code: 'PRS'}
-        ];
+  cars: SelectItem[];
 
-        this.cars = [
-            {label: 'Audi', value: 'Audi'},
-            {label: 'BMW', value: 'BMW'},
-            {label: 'Fiat', value: 'Fiat'},
-            {label: 'Ford', value: 'Ford'},
-            {label: 'Honda', value: 'Honda'},
-            {label: 'Jaguar', value: 'Jaguar'},
-            {label: 'Mercedes', value: 'Mercedes'},
-            {label: 'Renault', value: 'Renault'},
-            {label: 'VW', value: 'VW'},
-            {label: 'Volvo', value: 'Volvo'}
-        ];
-    }
-    
+  selectedCar: string = 'BMW';
+
+  constructor() {
+    this.cities = [
+      {name: 'New York', code: 'NY'},
+      {name: 'Rome', code: 'RM'},
+      {name: 'London', code: 'LDN'},
+      {name: 'Istanbul', code: 'IST'},
+      {name: 'Paris', code: 'PRS'}
+    ];
+
+    this.cars = [
+      {label: 'Audi', value: 'Audi'},
+      {label: 'BMW', value: 'BMW'},
+      {label: 'Fiat', value: 'Fiat'},
+      {label: 'Ford', value: 'Ford'},
+      {label: 'Honda', value: 'Honda'},
+      {label: 'Jaguar', value: 'Jaguar'},
+      {label: 'Mercedes', value: 'Mercedes'},
+      {label: 'Renault', value: 'Renault'},
+      {label: 'VW', value: 'VW'},
+      {label: 'Volvo', value: 'Volvo'}
+    ];
+
+    this.items = [
+      {label: 'View', icon: 'fa-search', command: (event) => console.log(event)},
+      {label: 'Delete', icon: 'fa-close', command: (event) => console.log(event)}
+    ];
+
+  }
+
 }
